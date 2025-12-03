@@ -1,14 +1,12 @@
 package main
 
 import (
+	// "strconv"
 	"fmt"
 )
 
 func main () {
-	for i:=0; i < 10; i++ {
-
-		fmt.Println("%d, %v", i, Factors(i))
-	}
+	fmt.Printf("Pow %d", 10^25)
 }
 
 func Factors(number int) []int {
