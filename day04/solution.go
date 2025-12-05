@@ -14,17 +14,27 @@ type Cell struct {
 }
 
 func (r Row) String() string {
-	return fmt.Sprintf("Row: %v\n", r.cells)
+	s := ""
+	for _, cell := range r.cells {
+		if cell.full {
+			s += fmt.Sprint("@")
+		} else {
+			s += fmt.Sprint(".")
+		}
+	}
+	s += fmt.Sprintln()
+	return s
 }
 
 func FormatInput(input []byte) ([]Row, error) {
 	var rows []Row = make([]Row, 0)
-	for i, line := range s.Split(string(input),"\n") {
+	for line := range s.SplitSeq(string(input), "\n") {
 		row := Row{cells: make([]Cell, 0)}
-		if(len(line) == 0) {break}
-		for j, letter := range s.Split(line,"") {
-			fmt.Println(i, j, letter)
-			row.cells = append(row.cells, Cell{full: letter=="@"})
+		if len(line) == 0 {
+			break
+		}
+		for letter := range s.SplitSeq(line, "") {
+			row.cells = append(row.cells, Cell{full: letter == "@"})
 		}
 		rows = append(rows, row)
 	}
@@ -36,40 +46,61 @@ type Point struct {
 	y int
 }
 
-func SolvePart1(rows []Row) int{
-	l := len(rows)
-	accessible := 0
-	for i, row := range rows {
-		for j, cell := range row.cells {
-			if !cell.full {continue}
-			neighbors := []Point{
-				{x:i-1, y:j-1},
-				{x:i-1, y:j+0},
-				{x:i-1, y:j+1},
-				{x:i+0, y:j-1},
-				{x:i+0, y:j+0},
-				{x:i+0, y:j+1},
-				{x:i+1, y:j-1},
-				{x:i+1, y:j+0},
-				{x:i+1, y:j+1},
-			}
+func (p Point) String() string {
+	return fmt.Sprintf("x: %d, y: %d\n", p.x, p.y)
+}
 
-			count := 0
-			// neighbors:
-			for _, n := range neighbors {
-				if(n.x >= 0 && n.y >= 0 && n.x < l && n.y < l && rows[n.x].cells[n.y].full) {
-					count++;
-				}
-			}
-			fmt.Println("Cell in", i, " col ", j, "has", count, "neighbors" )
-			if(count < 4) {
-				accessible++
-			}
-		}
-	}
-	return accessible
+func SolvePart1(rows []Row) int {
+	fmt.Print(findRemoveable(rows))
+	return len(findRemoveable(rows))
 }
 
 func SolvePart2(rows []Row) int {
-	return 0
+	removable := findRemoveable(rows)
+	totalRemoved := len(removable)
+	for len(removable) > 0 {
+
+		for _, point := range removable {
+			rows[point.x].cells[point.y].full = false
+		}
+
+		removable = findRemoveable(rows)
+		totalRemoved += len(removable)
+	}
+	fmt.Println(rows)
+	return totalRemoved
+}
+
+func findRemoveable(rows []Row) []Point {
+	l := len(rows)
+	removable := []Point{}
+	for i, row := range rows {
+		for j, cell := range row.cells {
+			if !cell.full {
+				continue
+			}
+			neighbors := []Point{
+				{x: i - 1, y: j - 1},
+				{x: i - 1, y: j + 0},
+				{x: i - 1, y: j + 1},
+				{x: i + 0, y: j - 1},
+				{x: i + 0, y: j + 1},
+				{x: i + 1, y: j - 1},
+				{x: i + 1, y: j + 0},
+				{x: i + 1, y: j + 1},
+			}
+
+			// neighbors:
+			count := 0
+			for _, n := range neighbors {
+				if n.x >= 0 && n.y >= 0 && n.x < l && n.y < l && rows[n.x].cells[n.y].full {
+					count++
+				}
+			}
+			if count < 4 {
+				removable = append(removable, Point{x: i, y: j})
+			}
+		}
+	}
+	return removable
 }
