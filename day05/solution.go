@@ -59,6 +59,39 @@ func SolvePart1(ranges []Range, ids []int) int {
 	return freshIngredients
 }
 
-func SolvePart2(items []Range, ids []int) int {
-	return 0
+func SolvePart2(ranges []Range, ids []int) int {
+	oldRanges := []Range{ranges[0]}
+	count := ranges[0].end - ranges[0].start + 1
+	for n := 0; n < len(ranges); n++ {
+		new := ranges[n]
+		oldRanges:
+		for o := 0; o < len(oldRanges); o++ {
+			old := oldRanges[o]
+			if new.end < new.start {break oldRanges}
+			if old.start <= new.start && new.start <= old.end && old.end < new.end { // LEFT
+				// fmt.Printf("new start %d end %d\n old start: %d end %d\n moving LEFT\n", new.start, new.end, old.start, old.end)
+				new.start = old.end + 1
+			} else if new.start < old.start && old.start <= new.end && new.end <= old.end { // RIGHT
+				// fmt.Printf("new start %d end %d\n old start: %d end %d\n moving RIGHT\n", new.start, new.end, old.start, old.end)
+				new.end = old.start - 1
+			} else if old.start <= new.start && new.end <= old.end { // OUTER
+				// fmt.Printf("new start %d end %d\n old start: %d end %d\n range is contained\n", new.start, new.end, old.start, old.end)
+				new.start = new.end + 1
+				break oldRanges
+			} else if new.start < old.start && old.end < new.end { // INNER
+				// fmt.Printf("new start: %d end %d\nold start: %d end %d\nrange is split into\n\t1: %d-%d and \n\t2: %d-%d\n\n", new.start, new.end, old.start, old.end, new.start, old.start - 1, old.end + 1, new.end)
+				//Splits new into 2, add right one to list, continue with left one
+				ranges = append(ranges, Range{start: old.end + 1, end: new.end})
+				ranges = append(ranges, Range{start: new.start, end: old.start -1})
+				new.start = new.end + 1
+				break oldRanges
+			}
+		}
+		if new.end >= new.start {
+			count += new.end - new.start + 1
+			oldRanges = append(oldRanges, Range{start: new.start, end: new.end})
+		}
+	}
+
+	return count
 }

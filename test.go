@@ -6,25 +6,12 @@ import (
 )
 
 func main () {
-	fmt.Printf("Pow %d", 10^25)
-}
-
-func Factors(number int) []int {
-	primes := make([]int, 0)
-
-	if(number > 0) {
-		primes = append(primes, 1)
-	}
-
-	for i:= 2; i * i <= number ; i++ {
-		if number % i == 0 {
-			primes = append(primes, i)
+	var nums []int = []int{1,2,3}
+	for i := 0; i< len(nums); i++ {
+		fmt.Println(nums[i])
+		if(nums[i] == 3) {
+			nums = append(nums, 4)
 		}
 	}
-
-	if(number > 1) {
-		primes = append(primes, number)
-	}
-
-	return primes
+	fmt.Printf("%v", nums)
 }
